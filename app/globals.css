@@ -1,85 +1,25 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #111827;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-  --card: #ffffff;
-  --border: #e5e7eb;
+  ::selection {
+    background-color: #4f46e5;
+    color: #fff;
+  }
 
-  --primary: #111827;
-  --primary-foreground: #ffffff;
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
 
-  --success: #16a34a;
-  --danger: #dc2626;
-}
+  ::-webkit-scrollbar-track {
+    background: #111827;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  --color-card: var(--card);
-  --color-border: var(--border);
-
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-
-  --color-success: var(--success);
-  --color-danger: var(--danger);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-button {
-  cursor: pointer;
-}
-
-input,
-button,
-textarea,
-select {
-  font: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-inline: 1rem;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  ::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 3px;
+  }
 }
