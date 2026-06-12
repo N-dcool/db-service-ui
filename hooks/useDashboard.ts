@@ -4,6 +4,14 @@ import { createDb, DbRecord, deleteDb, getDbStatus } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+function getTimeLeft(db: DbRecord): number {
+    if(db.expires_in_seconds != null && !Number.isNaN(db.expires_in_seconds)) {
+        return db.expires_in_seconds;
+    }
+
+    return Math.max(0, db.expires_at - Math.floor(Date.now()/1000));
+}
+
 export function useDashboard() {
   const router = useRouter();
 
@@ -68,7 +76,7 @@ export function useDashboard() {
     try {
       const data = await createDb(token);
       setDb(data);
-      setTimeLeft(data.expires_in_seconds);
+      setTimeLeft(getTimeLeft(data));
       setMaintenance(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown erro";
