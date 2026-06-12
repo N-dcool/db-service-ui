@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const features = [
   {
-    icon: "⚡",
+    icon: "⚡️",
     title: "Instant Provisioning",
     desc: "Your isolated PostgreSQL database is ready in under 10 seconds.",
   },
