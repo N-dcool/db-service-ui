@@ -3,6 +3,57 @@
 import { TableSchema } from "@/hooks/usePlayground";
 import { useState } from "react";
 
+type Column = { column_name: string; data_type: string; is_nullable: string };
+
+function ColumnList({ columns }: Readonly<{ columns: Column[] }>) {
+  return (
+    <div className="ml-4 mb-1">
+      {columns.map((col) => (
+        <div
+          key={col.column_name}
+          className="flex items-baseline gap-1.5 px-1.5 py-0.5"
+        >
+          <span className="font-mono text-gray-400 text-xs truncate">
+            {col.column_name}
+          </span>
+          <span className="text-gray-600 text-[10px] shrink-0">
+            {col.data_type}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TableRow({
+  name,
+  expanded,
+  columns,
+  onToggle,
+}: Readonly<{
+  name: string;
+  expanded: boolean;
+  columns: Column[];
+  onToggle: () => void;
+}>) {
+  return (
+    <div>
+      <button
+        onClick={() => onToggle()}
+        className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded 
+                     text-xs text-gray-300 hover:bg-gray-800 transition-colors"
+      >
+        <span className="text-gray-600 text-[10px] w-2">
+          {expanded ? "▼" : "▶"}
+        </span>
+        <span className="font-mono truncate">{name}</span>
+      </button>
+
+      {expanded && <ColumnList columns={columns} />}
+    </div>
+  );
+}
+
 interface SchemaPanelProps {
   tables: TableSchema;
   loading: boolean;
@@ -44,43 +95,22 @@ export default function SchemaPanel({
         </button>
       </div>
 
-      {loading ? (
-        <p className="text-xs text-gray-600">Loading...</p>
-      ) : tableNames.length === 0 ? (
+      {loading && <p className="text-xs text-gray-600">Loading...</p>}
+
+      {!loading && tableNames.length === 0 && (
         <p className="text-xs text-gray-600">No tables found</p>
-      ) : (
+      )}
+
+      {!loading && tableNames.length > 0 && (
         <div className="space-y-0.5">
           {tableNames.map((table) => (
-            <div key={table}>
-              <button
-                onClick={() => toggle(table)}
-                className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded 
-                     text-xs text-gray-300 hover:bg-gray-800 transition-colors"
-              >
-                <span className="text-gray-600 text-[10px] w-2">
-                  {expanded.has(table) ? "▼" : "▶"}
-                </span>
-                <span className="font-mono truncate">{table}</span>
-              </button>
-
-              {expanded.has(table) && (
-                <div className="ml-4 mb-1">
-                  {tables[table].map((col) => (
-                    <div
-                      key={col.column_name}
-                      className="flex items-baseline gap-1.5 px-1.5 py-0.5"
-                    >
-                      <span className="font-mono text-gray-400 text-xs truncate">
-                        {col.column_name}
-                      </span>
-                      <span className="text-gray-600 text-[10px] shrink-0">
-                        {col.data_type}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <TableRow
+              key={table}
+              name={table}
+              expanded={expanded.has(table)}
+              columns={tables[table]}
+              onToggle={() => toggle(table)}
+            />
           ))}
         </div>
       )}

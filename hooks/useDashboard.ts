@@ -2,7 +2,7 @@
 
 import { createDb, DbRecord, deleteDb, getDbStatus } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function getTimeLeft(db: DbRecord): number {
     if(db.expires_in_seconds != null && !Number.isNaN(db.expires_in_seconds)) {
@@ -15,6 +15,8 @@ function getTimeLeft(db: DbRecord): number {
 export function useDashboard() {
   const router = useRouter();
 
+  const fetchedRef = useRef(false);
+
   const [token, setToken] = useState<string | null>(null);
   const [db, setDb] = useState<DbRecord | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -25,6 +27,9 @@ export function useDashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+    
     const t = localStorage.getItem("token");
     if (t === null || !t) router.push("/login");
     else setToken(t);

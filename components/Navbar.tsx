@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -26,7 +27,7 @@ export function Navbar() {
                     href="/"
                     className="flex items-center gap-2 font-bold text-white text-base tracking-tight"
                 >
-                    <span className="text-indigo-400 text-lg">☁️</span> PiBase
+                    <Image src="/pi.png" alt="PiBase" width={24} height={24} /> PiBase
                 </Link>
 
                 <div className="flex items-center gap-1">
@@ -36,7 +37,13 @@ export function Navbar() {
                                 href="/dashboard"
                                 className="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
                             >
-                                Dashboard
+                                Dashboard 📊
+                            </Link>
+                            <Link
+                                href="/playground"
+                                className="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
+                            >
+                                Playground 🏂
                             </Link>
                             <button
                                 onClick={logout}

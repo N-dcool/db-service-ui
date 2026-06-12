@@ -2,7 +2,7 @@
 
 import { DbRecord, getDbStatus } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface QueryResult {
   rows: Record<string, unknown>[];
@@ -18,6 +18,8 @@ export type TableSchema = Record<
 
 export function usePlayground() {
   const router = useRouter();
+
+  const fetchedRef = useRef(false);
 
   const [db, setDb] = useState<DbRecord | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +51,10 @@ export function usePlayground() {
   }, []);
 
   useEffect(() => {
+
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
