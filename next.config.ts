@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    if (process.env.NODE_ENV !== "development") return [];
-
     // Dev-only proxy: forwards /api/* requests from the Next.js server (localhost:3000)
     // to the backend (localhost:3001) server-side, so the browser never makes a
     // cross-origin request and CORS is bypassed entirely.
@@ -16,11 +14,11 @@ const nextConfig: NextConfig = {
     //
     // To override the backend port locally, set DEV_API_URL in .env.local:
     //   DEV_API_URL=http://localhost:8080
+    if (process.env.NODE_ENV !== "development") return [];
+    const backend = process.env.DEV_API_URL ?? 'http://localhost:3001';
     return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.DEV_API_URL ?? "http://localhost:3001"}/api/:path*`,
-      },
+      { source: "/api/auth/:path*", destination: `${backend}/api/auth/:path*` },
+      { source: "/api/db/:path*", destination: `${backend}/api/db/:path*` },
     ];
   },
 };

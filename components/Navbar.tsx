@@ -26,7 +26,7 @@ export function Navbar() {
                     href="/"
                     className="flex items-center gap-2 font-bold text-white text-base tracking-tight"
                 >
-                    <span className="text-indigo-400 text-lg">☁️</span> CloudDB
+                    <span className="text-indigo-400 text-lg">☁️</span> PiBase
                 </Link>
 
                 <div className="flex items-center gap-1">

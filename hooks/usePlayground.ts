@@ -1,0 +1,123 @@
+"use client";
+
+import { DbRecord, getDbStatus } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+export interface QueryResult {
+  rows: Record<string, unknown>[];
+  fields: string[];
+  rowCounts: number;
+  ms: number;
+}
+
+export type TableSchema = Record<
+  string,
+  { column_name: string; data_type: string; is_nullable: string }[]
+>;
+
+export function usePlayground() {
+  const router = useRouter();
+
+  const [db, setDb] = useState<DbRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [sql, setSql] = useState("");
+  const [result, setResult] = useState<QueryResult | null>(null);
+  const [queryError, setQueryError] = useState("");
+  const [running, setRunning] = useState(false);
+
+  const [tables, setTables] = useState<TableSchema>({});
+  const [tablesLoading, setTablesLoading] = useState(false);
+
+  const fetchTables = useCallback(async (connectionString: string) => {
+    setTablesLoading(true);
+    try {
+      const res = await fetch("/api/tables", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ connectionString }),
+      });
+      const data = await res.json();
+      if (res.ok) setTables(data.tables ?? {});
+    } catch (err: unknown) {
+      console.error("Error fetching tables:", err);
+      setTables({});
+    } finally {
+      setTablesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    getDbStatus(token)
+      .then((data) => {
+        if (!data) {
+          router.push("/dashboard");
+          return;
+        }
+        setDb(data);
+        fetchTables(data.connection_string);
+      })
+      .catch(() => {
+        router.push("/dashboard");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [router, fetchTables]);
+
+  const runQuery = async () => {
+    if (!db || !sql.trim()) return;
+
+    setRunning(true);
+    setQueryError("");
+    setResult(null);
+
+    const t0 = Date.now();
+    try {
+      const res = await fetch("/api/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          connectionString: db.connection_string,
+          sql,
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setResult({ ...data, ms: Date.now() - t0 });
+      } else {
+        setQueryError(data.error ?? "Query failed");
+      }
+    } catch (err: unknown) {
+      setQueryError(err instanceof Error ? err.message : "Query failed");
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const refreshTables = () => {
+    if (db) fetchTables(db.connection_string);
+  };
+
+  return {
+    db,
+    loading,
+    sql,
+    setSql,
+    result,
+    queryError,
+    running,
+    tables,
+    tablesLoading,
+    runQuery,
+    refreshTables,
+  };
+}

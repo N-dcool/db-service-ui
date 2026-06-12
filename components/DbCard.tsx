@@ -1,6 +1,7 @@
 import { DbRecord } from "@/lib/api";
 import { formatDate, formatTime } from "@/util/format";
 import { ConnectionString } from "./ConnectionString";
+import Link from "next/link";
 
 interface DbCardProps {
   db: DbRecord;
@@ -9,7 +10,12 @@ interface DbCardProps {
   onDelete: () => void;
 }
 
-export function DbCard({ db, timeLeft, deleting, onDelete }: Readonly<DbCardProps>) {
+export function DbCard({
+  db,
+  timeLeft,
+  deleting,
+  onDelete,
+}: Readonly<DbCardProps>) {
   return (
     <div className="space-y-4">
       <div className="bg-gray-900 border-gray-800 rounded-xl p-6">
@@ -56,6 +62,18 @@ export function DbCard({ db, timeLeft, deleting, onDelete }: Readonly<DbCardProp
         </div>
         {/* Connection string */}
         <ConnectionString value={db.connection_string} />
+
+        {/* Playground link */}
+        <div className="mt-4 pt-4 border-t border-gray-800">
+          <Link
+            href="/playground"
+            className="w-full flex items-center justify-center gap-2 bg-gray-800 
+               hover:bg-gray-700 text-gray-300 hover:text-white py-2 rounded-lg text-sm 
+               font-medium transition-colors"
+          >
+            Open SQL Playground →
+          </Link>
+        </div>
       </div>
 
       {/* Specs strip */}
