@@ -32,13 +32,17 @@ export function usePlayground() {
   const [tables, setTables] = useState<TableSchema>({});
   const [tablesLoading, setTablesLoading] = useState(false);
 
-  const fetchTables = useCallback(async (connectionString: string) => {
+  const fetchTables = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
     setTablesLoading(true);
     try {
-      const res = await fetch("/api/tables", {
+      const res = await fetch("/api/db/tables", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ connectionString }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
       const data = await res.json();
       if (res.ok) setTables(data.tables ?? {});
@@ -51,7 +55,6 @@ export function usePlayground() {
   }, []);
 
   useEffect(() => {
-
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
@@ -68,7 +71,7 @@ export function usePlayground() {
           return;
         }
         setDb(data);
-        fetchTables(data.connection_string);
+        fetchTables();
       })
       .catch(() => {
         router.push("/dashboard");
@@ -87,11 +90,17 @@ export function usePlayground() {
 
     const t0 = Date.now();
     try {
-      const res = await fetch("/api/query", {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setQueryError("Not authenticated");
+        return;
+      }
+      const res = await fetch("/api/db/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify({
-          connectionString: db.connection_string,
           sql,
         }),
       });
@@ -110,7 +119,7 @@ export function usePlayground() {
   };
 
   const refreshTables = () => {
-    if (db) fetchTables(db.connection_string);
+    if (db) fetchTables();
   };
 
   return {
