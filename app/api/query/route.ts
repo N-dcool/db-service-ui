@@ -2,9 +2,7 @@
 import { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
-    const { connectionString, sql} = await req.json();
-
-    console.log("Received query:", { connectionString, sql });
+    // const { connectionString, sql} = await req.json();
 
     return Response.json({ message: "Feature is not implemented yet" });
 
