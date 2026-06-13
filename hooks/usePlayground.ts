@@ -42,6 +42,7 @@ export function usePlayground() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          body: JSON.stringify({}),
         },
       });
       const data = await res.json();
@@ -97,9 +98,10 @@ export function usePlayground() {
       }
       const res = await fetch("/api/db/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-         },
+        },
         body: JSON.stringify({
           sql,
         }),
