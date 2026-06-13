@@ -42,8 +42,8 @@ export function usePlayground() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-          body: JSON.stringify({}),
         },
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (res.ok) setTables(data.tables ?? {});
