@@ -1,15 +1,11 @@
 "use client";
 
-import { createDb, DbRecord, deleteDb, getDbStatus } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {createDb, DbRecord, deleteDb, expiresInSeconds, getDbStatus} from "@/lib/api";
 
 function getTimeLeft(db: DbRecord): number {
-    if(db.expires_in_seconds != null && !Number.isNaN(db.expires_in_seconds)) {
-        return db.expires_in_seconds;
-    }
-
-    return Math.max(0, db.expires_at - Math.floor(Date.now()/1000));
+    return expiresInSeconds(db);
 }
 
 export function useDashboard() {
@@ -40,7 +36,7 @@ export function useDashboard() {
     try {
       const data = await getDbStatus(t);
       setDb(data);
-      setTimeLeft(data ? data.expires_in_seconds : 0);
+      setTimeLeft(data ? getTimeLeft(data) : 0);
       setMaintenance(false);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "MAINTENANCE") {
@@ -73,6 +69,21 @@ export function useDashboard() {
   }, [db]);
 
   // Handlers
+  const pollUntilRunning = useCallback(async (t: string)=> {
+    const maxAttempts = 30;
+    for(let i=0; i<maxAttempts; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      try {
+        const data = await getDbStatus(t);
+        if(data) {
+          setDb(data);
+          setTimeLeft(getTimeLeft(data));
+          if(data.status === 'RUNNING') return;
+        }
+      } catch { break; }
+    }
+  }, []);
+
   const handleCreate = async () => {
     if (!token) return;
     setCreating(true);
@@ -83,6 +94,9 @@ export function useDashboard() {
       setDb(data);
       setTimeLeft(getTimeLeft(data));
       setMaintenance(false);
+      if(data.status !== 'RUNNING') {
+        await pollUntilRunning(token);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown erro";
       if (msg === "MAINTENANCE") setMaintenance(true);

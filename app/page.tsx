@@ -33,7 +33,7 @@ const terminalSteps = [
     type: "cmd-cont",
     text: '        -d \'{"email":"you@example.com","password":"..."}\'',
   },
-  { type: "out", text: '→ {"token":"eyJhbGciOiJIUzI1NiJ9..."}' },
+  { type: "out", text: '→ {"accessToken":"eyJhbGciOiJIUzI1NiJ9..."}' },
   { type: "gap", text: "" },
   { type: "comment", text: "# 2. Create a PostgreSQL database" },
   {
@@ -46,7 +46,7 @@ const terminalSteps = [
   },
   {
     type: "out",
-    text: '→ {"connection_string":"postgresql://dbuser:abc@db.nareshchoudhary.com:5433/db_xyz"}',
+    text: '→ {"id":"abcde", "status":"PROVISIONING" ,"directUri":"postgresql://..."}',
   },
   { type: "gap", text: "" },
   { type: "comment", text: "# 3. Connect with psql" },
@@ -181,7 +181,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-gray-700/50 py-6">
         <p className="text-center text-xs text-gray-700">
-          Build on Raspberry Pi 5 . Docker . Fastify . Traefik . Cloudflare
+          Build on Raspberry Pi 5 . Docker . Spring Boot . Traefik . Cloudflare
         </p>
       </footer>
     </main>

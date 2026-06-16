@@ -1,4 +1,4 @@
-import { QueryResult } from "@/hooks/usePlayground";
+import {QueryResult} from "@/lib/api";
 
 interface ResultsTableProps {
   result: QueryResult | null;
@@ -28,7 +28,7 @@ export function ResultsTable({ result, error }: Readonly<ResultsTableProps>) {
   if(!result.rows || result.rows.length === 0) {
     return (
         <div className="text-sm text-gray-500">
-            Query OK ・ {result.rowCount} row{result.rowCount === 1 ? "" : "s"} affected ・{result.ms}ms
+            {result.message ?? `Query OK ・ ${result.rowCount} row${result.rowCount === 1 ? "" : "s"} affected`} ・{result.ms}ms
         </div>
     );
   }
@@ -43,7 +43,7 @@ export function ResultsTable({ result, error }: Readonly<ResultsTableProps>) {
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-900 border-b border-gray-800">
             <tr>
-              {result.fields.map((field) => (
+              {result.fields?.map((field) => (
                 <th
                   key={field}
                   className="px-3 py-2 font-medium text-gray-400 text-xs whitespace-nowrap"
@@ -59,7 +59,7 @@ export function ResultsTable({ result, error }: Readonly<ResultsTableProps>) {
                 key={i}
                 className="border-b border-gray-800/50 hover:bg-gray-900/40 transition-colors"
               >
-                {result.fields.map((field) => (
+                {result.fields?.map((field) => (
                   <td
                     key={field}
                     className="px-3 py-2 font-mono text-xs text-gray-300 

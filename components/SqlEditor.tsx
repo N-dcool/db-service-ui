@@ -1,3 +1,10 @@
+"use client";
+
+import {useCallback} from "react";
+import ReactCodeMirror, {keymap} from "@uiw/react-codemirror";
+import {PostgreSQL, sql} from "@codemirror/lang-sql";
+import {oneDark} from "@codemirror/theme-one-dark";
+
 interface SqlEditorProps {
   sql: string;
   onChange: (newSql: string) => void;
@@ -6,35 +13,49 @@ interface SqlEditorProps {
 }
 
 export function SqlEditor({
-  sql,
+  sql: value,
   onChange,
   onRun,
   running,
 }: Readonly<SqlEditorProps>) {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-      e.preventDefault();
-      onRun();
-    }
-  };
+  const runKeymap = useCallback(
+      () =>
+          keymap.of([
+            {
+              key: 'Ctrl-Enter',
+              mac: 'Cmd-Enter',
+              run: () => {
+                onRun();
+                return true;
+              }
+            }
+          ]),
+      [onRun]
+  );
 
   return (
     <div className="space-y-3">
-      <textarea
-        value={sql}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="SELECT * FROM your_table LIMIT 100;"
-        spellCheck={false}
-        rows={5}
-        className="w-full bg-gray-900 border-gray-700 rounded-lg px-3 py-2.5 text-sm 
-                 font-mono text-white placeholder-gray-600 focus:outline-none 
-                 focus:border-indigo-500 transition-colors resize-y"
-      />
+      <div className="rounded-lg overflow-hidden border border-gray-700 focus-within:border-indigo-500 transition-colors">
+        <ReactCodeMirror
+          value={value}
+          onChange={onChange}
+          height="160px"
+          theme={oneDark}
+          extensions={[sql({dialect: PostgreSQL}), runKeymap()]}
+          placeholder="SELECT * FROM your_table LIMIT 100;"
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: false,
+            highlightActiveLine: true,
+            bracketMatching: true,
+            autocompletion: true
+          }}
+        />
+      </div>
       <div className="flex items-center gap-3">
         <button
           onClick={onRun}
-          disabled={running || !sql.trim()}
+          disabled={running || !value.trim()}
           className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 
                    disabled:cursor-not-allowed text-white px-4 py-1.5 rounded-md text-sm 
                    font-medium transition-colors flex items-center gap-2"
@@ -51,7 +72,7 @@ export function SqlEditor({
             "Run Query"
           )}
         </button>
-        <span className="text-xs text-gray-600">Ctrl+Enter to run</span>
+        <span className="text-xs text-gray-600">Cmd+Enter to run</span>
       </div>
     </div>
   );

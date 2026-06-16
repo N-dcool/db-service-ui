@@ -55,7 +55,7 @@ export default function Playground() {
               className="text-xs font-mono bg-gray-900 border-gray-800 
                            px-2 py-1 rounded text-gray-400"
             >
-              {db.db_name}
+              {db.dbName}
             </span>
           )}
         </div>

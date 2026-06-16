@@ -10,6 +10,8 @@ export default function RegisterPage() {
     setEmail,
     password,
     setPassword,
+    displayName,
+    setDisplayName,
     error,
     loading,
     handleSubmit,
@@ -38,6 +40,22 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1.5" htmlFor="displayName">
+              Display name <span className="text-gray-600">(optional)</span>
+            </label>
+            <input
+                id="displayName"
+                type="text"
+                autoComplete="name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="binod"
+                className="w-full bg-gray-900 border-gray-700 rounded-lg px-3 py-2.5
+             text-sm text-white placeholder-gray-600 focus:outline-none
+             focus:border-indigo-500 transition-colors"
+            />
+          </div>
           <div>
             <label
               className="block text-sm text-gray-400 mb-1.5"

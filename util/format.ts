@@ -7,8 +7,8 @@ export function formatTime(seconds: number): string {
     return [h, m ,s].map((v) => String(v).padStart(2, '0')).join(':');
 }
 
-export function formatDate(unixSeconds: number): string {
-    return new Date(unixSeconds * 1000).toLocaleString(undefined, {
+export function formatDate(isoString: string): string {
+    return new Date(isoString).toLocaleString(undefined, {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',

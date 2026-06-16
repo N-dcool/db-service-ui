@@ -1,15 +1,8 @@
 "use client";
 
-import { DbRecord, getDbStatus } from "@/lib/api";
+import {DbRecord, executeQuery, getDbStatus, getTables, QueryResult} from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-export interface QueryResult {
-  rows: Record<string, unknown>[];
-  fields: string[];
-  rowCount: number;
-  ms: number;
-}
 
 export type TableSchema = Record<
   string,
@@ -37,16 +30,8 @@ export function usePlayground() {
     if (!token) return;
     setTablesLoading(true);
     try {
-      const res = await fetch("/api/db/tables", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({}),
-      });
-      const data = await res.json();
-      if (res.ok) setTables(data.tables ?? {});
+      const data = await getTables(token);
+      setTables(data ?? {})
     } catch (err: unknown) {
       console.error("Error fetching tables:", err);
       setTables({});
@@ -89,30 +74,13 @@ export function usePlayground() {
     setQueryError("");
     setResult(null);
 
-    const t0 = Date.now();
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setQueryError("Not authenticated");
         return;
       }
-      const res = await fetch("/api/db/query", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          sql,
-        }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setResult({ ...data, ms: Date.now() - t0 });
-      } else {
-        setQueryError(data.error ?? "Query failed");
-      }
+      const data = await executeQuery(token, sql);
+      setResult(data);
     } catch (err: unknown) {
       setQueryError(err instanceof Error ? err.message : "Query failed");
     } finally {

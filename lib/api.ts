@@ -3,43 +3,71 @@ const  BASE = '/api';
 
 export interface DbRecord {
     id: string;
-    connection_string: string;
-    host: string;
-    port: number;
-    db_name: string;
-    username: string;
-    password: string;
-    expires_at: number;
-    expires_in_seconds: number;
-    created_at: number;
+    engine: string;
+    engineVersion: string;
+    status: string;
+    dbName: string;
+    dbUser: string
+    hostPort: number;
+    directUri: string | null
+    pooledUri: string | null;
+    memoryLimitMb: number;
+    storageLimitMb: number;
+    ttlHours: number
+    expiresAt: string;
+    createdAt: string;
 }
 
 export interface User {
     id: string;
     email: string;
-    created_at: number;
+    displayName: string | null;
 }
+
+export interface QueryResult {
+    fields: string[] | null;
+    rows: Record<string, unknown>[] | null;
+    rowCount: number;
+    ms: number;
+    message: string | null;
+}
+
+// Helper: secondss util expiry
+export function expiresInSeconds(db: DbRecord): number {
+    return Math.max(0, Math.floor((new Date(db.expiresAt).getTime() - Date.now())/1000));
+}
+
+// Base request
 
 async function request(path: string, options: RequestInit = {}): Promise<Response>{
     const res = await fetch(`${BASE}${path}`, options);
 
     if(res.status === 503) {
         const body = await res.json().catch(() => ({}));
-        if(body.error === 'maintenance') {
+        if(body.message === 'maintenance' || body.error === 'maintenance') {
             throw new Error('MAINTENANCE');
         }
     }
-
     return res;
-} 
+}
 
-export async function register(email: string, password: string): Promise<{ token: string}> {
+async function parseError(res: Response, fallback: string): Promise<string> {
+    try {
+        const body = await res.json();
+        return body.message ?? fallback;
+    } catch {
+        return res.status === 401 ? "Session expired - please log in again" : fallback;
+    }
+}
+
+// Auth
+export async function register(email: string, password: string, displayName?: string): Promise<{ accessToken: string}> {
     const res = await request('/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, displayName: displayName || undefined })
     });
 
     const body = await res.json();
@@ -48,7 +76,7 @@ export async function register(email: string, password: string): Promise<{ token
     return body;
 }
 
-export async function login(email: string, password: string): Promise<{ token: string}> {
+export async function login(email: string, password: string): Promise<{ accessToken: string}> {
     const res = await request('/auth/login', {
         method: 'POST',
         headers: {
@@ -75,18 +103,20 @@ export async function getMe(token: string): Promise<User> {
     return res.json();
 }
 
-export async function createDb(token: string): Promise<DbRecord> {
+// Database
+export async function createDb(token: string, engine = 'postgresql'): Promise<DbRecord> {
     const res = await request('/db/create', {
         method: 'POST',
         headers: {
+            'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({engine})
     });
 
-    const body = await res.json();
-    if(!res.ok) throw new Error(body.message ?? 'Failed to create database');
+    if(!res.ok) throw new Error(await parseError(res ,'Failed to create database'));
 
-    return body;
+    return res.json();
 }
 
 export async function getDbStatus(token: string) : Promise<DbRecord | null> {
@@ -96,8 +126,8 @@ export async function getDbStatus(token: string) : Promise<DbRecord | null> {
         }
     });
 
-    if(res.status === 404) return null;
-    if(!res.ok) throw new Error('Failed to fetch database status');
+    if(res.status === 404 || res.status === 204) return null;
+    if(!res.ok) throw new Error(await parseError(res, 'Failed to fetch database status'));
 
     return res.json();
 }
@@ -110,7 +140,40 @@ export async function deleteDb(token: string) : Promise<void> {
         }
     });
 
-    if(!res.ok) throw new Error('Failed to delete database');
+    if(!res.ok) throw new Error(await parseError(res, 'Failed to delete database'));
+}
+
+export async function restart(token: string): Promise<void> {
+    const res = await request("/db/restart", {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`}
+    });
+
+    if(!res.ok) throw new Error(await parseError(res, "Failed to restart database"));
+}
+
+// Playground
+
+export async function executeQuery(token: string, sql: string): Promise<QueryResult> {
+    const res = await request('/playground/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' ,Authorization: `Bearer ${token}`},
+        body: JSON.stringify({sql})
+    });
+
+    if(!res.ok) throw new Error(await parseError(res, "Query failed"));
+
+    return res.json();
+}
+
+export async function getTables(token: string): Promise<Record<string, { column_name: string; data_type: string; is_nullable: string }[]>> {
+    const res = await request("/playground/tables", {
+        headers: {Authorization: `Bearer ${token}`}
+    });
+
+    if(!res.ok) throw new Error(await parseError(res, "Failed to fetch tables"));
+
+    return res.json();
 }
 
 

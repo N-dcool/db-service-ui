@@ -20,6 +20,18 @@ export function Navbar() {
         route.push("/");
     };
 
+    const navLink = (href: string, label: string) => {
+        const isActive = pathname === href;
+        return (
+            <Link href={href} className={`text-sm px-3 py-1.5 rounded-md transition-colors ${
+                isActive ? 
+                    'text-white bg-gray-800'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+            }`}>
+                {label}
+            </Link>        );
+    };
+
     return (
         <nav className="border-b border-gray-800/60 bg-gray-950/80 backdrop-blur-sm sticky top-0 z-50">
             <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -33,33 +45,19 @@ export function Navbar() {
                 <div className="flex items-center gap-1">
                     {isLoggedIn ? (
                         <>
-                            <Link
-                                href="/dashboard"
-                                className="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
-                            >
-                                Dashboard 📊
-                            </Link>
-                            <Link
-                                href="/playground"
-                                className="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
-                            >
-                                Playground 🏂
-                            </Link>
+                            {navLink('/dashboard', 'Dashboard')}
+                            {navLink('/playground', 'Playground')}
+                            <div className="w-px h-5 bg-gray-800 mx-1.5" />
                             <button
                                 onClick={logout}
-                                className="text-sm text-gray-500 hover:text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
+                                className="text-sm text-gray-500 hover:text-red-400 px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
                             >
                                 Logout
                             </button>
                         </>
                     ) : (
                         <>
-                            <Link
-                                href="/login"
-                                className="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
-                            >
-                                Login
-                            </Link>
+                            {navLink('/login', 'Login')}
                             <Link
                                 href="/register"
                                 className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-md font-medium transition-colors"
