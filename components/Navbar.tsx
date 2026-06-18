@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getToken } from "@/lib/tokens";
+import { logout } from "@/lib/api";
 
 export function Navbar() {
     const pathname = usePathname();
@@ -11,11 +13,11 @@ export function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        setIsLoggedIn(!!localStorage.getItem("token"));
+        setIsLoggedIn(!!getToken());
     }, [pathname]);
 
-    const logout = () => {
-        localStorage.removeItem("token");
+    const handleLogout = async () => {
+        await logout();
         setIsLoggedIn(false);
         route.push("/");
     };
@@ -49,7 +51,7 @@ export function Navbar() {
                             {navLink('/playground', 'Playground')}
                             <div className="w-px h-5 bg-gray-800 mx-1.5" />
                             <button
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className="text-sm text-gray-500 hover:text-red-400 px-3 py-1.5 rounded-md hover:bg-gray-800 transition-colors"
                             >
                                 Logout

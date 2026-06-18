@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {createDb, DbRecord, deleteDb, expiresInSeconds, getDbStatus} from "@/lib/api";
+import {createDb, deleteDb, expiresInSeconds, getDbStatus} from "@/lib/api";
+import { DbRecord } from "@/lib/types";
+import { getToken } from "@/lib/tokens";
 
 function getTimeLeft(db: DbRecord): number {
     return expiresInSeconds(db);
@@ -13,7 +15,7 @@ export function useDashboard() {
 
   const fetchedRef = useRef(false);
 
-  const [token, setToken] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
   const [db, setDb] = useState<DbRecord | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loadingStatus, setLoadingStatus] = useState(true);
@@ -26,15 +28,19 @@ export function useDashboard() {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
     
-    const t = localStorage.getItem("token");
-    if (t === null || !t) router.push("/login");
-    else setToken(t);
+    const t = getToken();
+    if (t === null || !t) {
+      router.push("/login");
+    }
+    else {
+      setReady(true);
+    }
   }, [router]);
 
   // Fetch DB status on token ready
-  const fetchStatus = useCallback(async (t: string) => {
+  const fetchStatus = useCallback(async () => {
     try {
-      const data = await getDbStatus(t);
+      const data = await getDbStatus();
       setDb(data);
       setTimeLeft(data ? getTimeLeft(data) : 0);
       setMaintenance(false);
@@ -48,8 +54,8 @@ export function useDashboard() {
   }, []);
 
   useEffect(() => {
-    if (token) fetchStatus(token);
-  }, [token, fetchStatus]);
+    if (ready) fetchStatus();
+  }, [ready, fetchStatus]);
 
   // Live countdown timer
   useEffect(() => {
@@ -69,12 +75,12 @@ export function useDashboard() {
   }, [db]);
 
   // Handlers
-  const pollUntilRunning = useCallback(async (t: string)=> {
+  const pollUntilRunning = useCallback(async ()=> {
     const maxAttempts = 30;
     for(let i=0; i<maxAttempts; i++) {
       await new Promise((r) => setTimeout(r, 2000));
       try {
-        const data = await getDbStatus(t);
+        const data = await getDbStatus();
         if(data) {
           setDb(data);
           setTimeLeft(getTimeLeft(data));
@@ -85,17 +91,17 @@ export function useDashboard() {
   }, []);
 
   const handleCreate = async () => {
-    if (!token) return;
+    if (!ready) return;
     setCreating(true);
     setError("");
 
     try {
-      const data = await createDb(token);
+      const data = await createDb();
       setDb(data);
       setTimeLeft(getTimeLeft(data));
       setMaintenance(false);
       if(data.status !== 'RUNNING') {
-        await pollUntilRunning(token);
+        await pollUntilRunning();
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown erro";
@@ -107,14 +113,14 @@ export function useDashboard() {
   };
 
   const handleDelete = async () => {
-    if (!token || !db) return;
+    if (!ready || !db) return;
     if (!confirm("Delete your database? All data will be permanently lost."))
       return;
     setDeleting(true);
     setError("");
 
     try {
-      await deleteDb(token);
+      await deleteDb();
       setDb(null);
       setTimeLeft(0);
       setMaintenance(false);

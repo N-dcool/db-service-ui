@@ -1,9 +1,10 @@
 'use client';
 
+import { saveTokens } from "@/lib/tokens";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-type AuthApiFn = (email: string, password: string, displayName?: string) => Promise<{ accessToken: string }>;
+type AuthApiFn = (email: string, password: string, displayName?: string) => Promise<{ accessToken: string, refreshToken: string }>;
 
 interface UseAuthFormOptions {
     apiFn: AuthApiFn;
@@ -34,8 +35,8 @@ export function useAuthForm({ apiFn, fallbackError = 'Failed', validate, hasDisp
 
         setLoading(true);
         try{
-            const { accessToken } = await apiFn(email, password, hasDisplayName ? displayName : undefined);
-            localStorage.setItem("token", accessToken);
+            const { accessToken, refreshToken } = await apiFn(email, password, hasDisplayName ? displayName : undefined);
+            saveTokens(accessToken, refreshToken);
             router.push("/dashboard");
         } catch(err: unknown) {
             const msg = err instanceof Error ? err.message : fallbackError;
