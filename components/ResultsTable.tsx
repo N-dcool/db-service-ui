@@ -1,4 +1,4 @@
-import {QueryResult} from "@/lib/api";
+import {QueryResult} from "@/lib/types";
 
 interface ResultsTableProps {
   result: QueryResult | null;

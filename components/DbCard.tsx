@@ -1,7 +1,7 @@
-import { DbRecord } from "@/lib/api";
 import { formatDate, formatTime } from "@/util/format";
 import { ConnectionString } from "./ConnectionString";
 import Link from "next/link";
+import {DbRecord} from "@/lib/types";
 
 interface DbCardProps {
   db: DbRecord;

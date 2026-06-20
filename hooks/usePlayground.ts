@@ -1,8 +1,9 @@
 "use client";
 
-import {DbRecord, executeQuery, getDbStatus, getTables, QueryResult} from "@/lib/api";
+import {executeQuery, getDbStatus, getTables} from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {DbRecord, QueryResult} from "@/lib/types";
 
 export type TableSchema = Record<
   string,
@@ -30,7 +31,7 @@ export function usePlayground() {
     if (!token) return;
     setTablesLoading(true);
     try {
-      const data = await getTables(token);
+      const data = await getTables();
       setTables(data ?? {})
     } catch (err: unknown) {
       console.error("Error fetching tables:", err);
@@ -50,7 +51,7 @@ export function usePlayground() {
       return;
     }
 
-    getDbStatus(token)
+    getDbStatus()
       .then((data) => {
         if (!data) {
           router.push("/dashboard");
@@ -79,7 +80,7 @@ export function usePlayground() {
       if (!token) {
         return;
       }
-      const data = await executeQuery(token, sql);
+      const data = await executeQuery(sql);
       setResult(data);
     } catch (err: unknown) {
       setQueryError(err instanceof Error ? err.message : "Query failed");
