@@ -36,7 +36,8 @@ export async function rawFetch(
   const res = await fetch(`${BASE}${path}`, options);
 
   if (res.status === 503) {
-    const body = await res.json().catch(() => ({}));
+    const clone = res.clone();
+    const body = await clone.json().catch(() => ({}));
     if (body.message === "maintenance" || body.error === "maintenance") {
       throw new Error("MAINTENANCE");
     }
@@ -68,6 +69,7 @@ export async function authFetch(
 
     clearToken();
     globalThis.location.href = "/login";
+    throw new Error('Session expired - please log in again');
   }
 
   return res;
