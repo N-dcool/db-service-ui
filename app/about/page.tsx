@@ -9,46 +9,46 @@ export const metadata: Metadata = {
 
 const blogPosts = [
   {
-    title: "CGNAT + WireGuard: Exposing a Raspberry Pi to the Internet",
+    title: "How I Built a Home DBaaS on a Raspberry Pi",
     description:
-      "How I bypassed CGNAT using an Oracle Cloud VPS as a WireGuard relay to expose TCP ports from my Pi.",
-    href: "https://nareshchoudhary.com/blog/cgnat-wireguard-relay",
+      "The full architecture overview for PiBase: Cloudflare, Oracle VPS, WireGuard, HAProxy, SQL-over-HTTP, and a Raspberry Pi database host.",
+    href: "https://nareshchoudhary.com/blogs/db-as-a-service-on-pi5-architecture",
   },
   {
-    title: "Wildcard TLS & SNI-Based Database Routing",
+    title: "The Cloudflare Edge Layer - One Domain, Two Backends",
     description:
-      "Using HAProxy to terminate TLS and route database connections by hostname – one port for all databases.",
-    href: "https://nareshchoudhary.com/blog/wildcard-tls-sni-routing",
+      "How a Cloudflare Worker routes API requests to the Pi backend and frontend requests to Vercel under one domain.",
+    href: "https://nareshchoudhary.com/blogs/cloudflare-edge-layer",
   },
   {
-    title: "WireGuard + iptables Deep Dive",
+    title: "CGNAT & WireGuard Relay",
     description:
-      "A detailed walkthrough of WireGuard tunnels, NAT traversal, iptables DNAT, and Oracle Cloud firewall gotchas.",
-    href: "https://nareshchoudhary.com/blog/wireguard-iptables-deep-dive",
+      "How I bypassed CGNAT using an Oracle Cloud VPS as a WireGuard relay to expose database TCP traffic from my Pi.",
+    href: "https://nareshchoudhary.com/blogs/cgnat-wireguard-relay",
   },
   {
-    title: "Docker 28 Broke Everything",
+    title: "HAProxy SNI Routing - One Port, Unlimited Databases",
     description:
-      "How Docker 28 dropped support for older API versions and broke Traefik, Portainer, and Watchtower – and how I fixed it.",
-    href: "https://nareshchoudhary.com/blog/docker-28-broke-everything",
+      "Using HAProxy and TLS SNI to route many database connections through the standard PostgreSQL port.",
+    href: "https://nareshchoudhary.com/blogs/haproxy-sni-routing",
   },
   {
-    title: "The Refresh Token Race Condition",
+    title: "The Playground - SQL over HTTP",
     description:
-      "A subtle concurrency bug where multiple tabs refresh the same token simultaneously - and the fix.",
-    href: "https://nareshchoudhary.com/blog/refresh-token-race-condition",
+      "How the browser playground runs SQL through an HTTP API because browsers and edge runtimes cannot open raw TCP sockets.",
+    href: "https://nareshchoudhary.com/blogs/sql-over-http-gateway",
   },
   {
-    title: "Why Refresh Tokens?",
+    title: "Database Wire Protocols vs HTTP",
     description:
-      "A deep dive into access vs. refresh token architecture, rotation strategies, and why short-lived JWTs matter.",
-    href: "https://nareshchoudhary.com/blog/why-refresh-tokens",
+      "Why Cloudflare Tunnel works for HTTP APIs but cannot carry PostgreSQL or MySQL wire protocol traffic.",
+    href: "https://nareshchoudhary.com/blogs/database-wire-protocols-vs-http",
   },
   {
-    title: "DBaaS Architecture Comparison",
+    title: "What I Borrowed from Neon, PlanetScale, and Other DBaaS Architectures",
     description:
-      "How Neon, Supabase, PlanetScale, and others architect their database platforms - and what I borrowed for this project.",
-    href: "https://nareshchoudhary.com/blog/dbaas-architectures",
+      "A scaled-down look at the DBaaS patterns behind PiBase: proxy routing, SQL-over-HTTP, and tenant-aware access paths.",
+    href: "https://nareshchoudhary.com/blogs/dbaas-architecture-patterns",
   },
 ];
 
